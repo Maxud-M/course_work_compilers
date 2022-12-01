@@ -5,17 +5,17 @@
 module Lexer (getTokens, Tag, Token, Position, Fragment) where
 
 
-import qualified Data.Text as T
-import Data.Char
-import Control.Monad.State
+import qualified Data.Text as T(Text, pack, unpack, length, index, take, drop)
+import Data.Char(isLower)
+import Control.Monad.State(State, evalState, get, put)
 import Data.List() 
 import Control.Monad (unless, when)
-import Control.Monad.Except
-import Data.Either
+import Control.Monad.Except(ExceptT, runExceptT, throwError)
+import Data.Either()
 
 
 
-data Tag = LEFT_BRACKET | RIGHT_BRACKET | ARROW | TERM | EOF deriving (Eq)
+data Tag = LEFT_BRACKET | RIGHT_BRACKET | ARROW | TERM | COMMA | BACKSLASH | EOF deriving (Eq)
 data Token = Token {frag:: !Fragment, tag:: !Tag, image:: !T.Text}
 data Position = Position {index:: !Int, line:: !Int, column:: !Int}
 data Fragment = Fragment {starting:: !Position, following:: !Position}
@@ -73,6 +73,8 @@ getTagFromChar::Char -> EvalMonad Tag
 getTagFromChar '(' = return LEFT_BRACKET
 getTagFromChar ')' = return RIGHT_BRACKET
 getTagFromChar '-' = return ARROW
+getTagFromChar ',' = return COMMA
+getTagFromChar '\\' = return BACKSLASH
 getTagFromChar char = do
                     if isLower char 
                         then return TERM
@@ -151,14 +153,3 @@ skipWhiteSpaces = do
         when (curChar `elem` whiteSpace) $ do 
             next
             skipWhiteSpaces
-
-
-
-
-
-    
-    
-
-
-
-
